@@ -1,6 +1,3 @@
-Certainly! Here's a README.md file for the Government Bond Pricer Application:
-
-```markdown
 # Government Bond Pricer Application
 
 Welcome to the Government Bond Pricer Application! This Streamlit-based tool allows users to analyze and price US government bonds. With intuitive features and interactive visualizations, users can gain insights into bond performance under various scenarios and conduct sensitivity analyses to assess the impact of changes in coupon rates and maturity periods.
@@ -43,6 +40,3 @@ Contributions to the Government Bond Pricer Application are welcome! If you enco
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
-```
-
-Feel free to customize the README.md file as needed for your project!
