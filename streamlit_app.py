@@ -10,7 +10,6 @@ import pandas as pd
 import altair as alt
 import plotly.express as px
 from fpdf import FPDF
-from scipy.optimize import root_scalar
 from transformers import PegasusTokenizer, PegasusForConditionalGeneration, pipeline
 from bs4 import BeautifulSoup
 import requests
@@ -18,14 +17,11 @@ import numba
 import re
 import torch
 import sentencepiece
-import tensorflow
+#import tensorflow
 from transformers import logging
+
 logging.set_verbosity_error()
 
-# Disable error message.
-st.set_option('deprecation.showPyplotGlobalUse', False)
-
-# Set MLCompute device.
 if torch.cuda.is_available():
     device = "cuda"
 else:
@@ -33,9 +29,6 @@ else:
 
 class BondApp:
     def __init__(self):
-        """
-        Initialize the BondApp class with default parameters.
-        """
         self.bond_symbol = None
         self.face_value = None
         self.coupon_rate = None
@@ -46,51 +39,22 @@ class BondApp:
         self.bond_pricer = None
 
     def run(self):
-        """
-        Run the Streamlit application.
-        """  
-        # Set page layout to wide and initial sidebar state to auto
-        st.set_page_config(layout="centered", initial_sidebar_state="auto")
-        # Display instructions and information about the application.
-        st.title("Government Bond Pricer")
-        st.write("Welcome to the Government Bond Pricer! This tool allows you to analyze and price US government bonds.")
-        # Additional information and instructions.
-        st.markdown("## Exporting Results")
-        st.write("Export analysis results to PDF or CSV format for further reference or sharing.")
-        st.write("You can export scenario and sensitivity analysis results, including histograms, summary statistics, and price range explanations.")
-        # User instructions and information about bond selection.
-        st.markdown("## Bond Selection")
-        st.write("Please select a US government bond symbol from the dropdown menu below:")
+        st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+        st.sidebar.title("Government Bond Pricer")
+        st.sidebar.write("Welcome to the Government Bond Pricer! This tool allows you to analyze and price US government bonds.")
 
         self.select_bond()
-        st.write(f"### News and sentiment of {self.bond_symbol}")
-
-        # Fetch news data button
-        if st.button("Get News Summary and Sentiment"):
-            self.fetch_and_analyze_news()
-        if self.bond_symbol:
-            self.fetch_bond_data()
-            self.display_bond_details()
-            self.plot_last_price_chart()
-            self.get_simulation_parameters()
-
-            if self.num_simulations and self.mean_yield and self.volatility:
-                self.run_scenario_analysis()
-                self.run_sensitivity_analysis()        
-
+        self.fetch_bond_data()
+        self.display_bond_details()
+        self.get_simulation_parameters()
+        self.run_scenario_analysis()
+        self.run_sensitivity_analysis()
+        self.fetch_and_analyze_news()
 
     def select_bond(self):
-        """
-        Display dropdown to select the US government bond symbol.
-        """
-        # Dropdown menu for selecting bond symbol.
-        self.bond_symbol = st.selectbox("Select US Government Bond Symbol", ["^IRX", "^FVX", "^TNX", "^TYX"])
+        self.bond_symbol = st.sidebar.selectbox("Select US Government Bond Symbol", ["^IRX", "^FVX", "^TNX", "^TYX"])
 
     def fetch_bond_data(self):
-        """
-        Fetch bond data based on the selected bond symbol.
-        """
-        # Fetch bond data based on selected bond symbol.
         bond_data = yf.Ticker(self.bond_symbol)
         bond_info = bond_data.info
 
@@ -98,17 +62,12 @@ class BondApp:
         self.coupon_rate = bond_info.get('couponRate', 5.0) * 100
         self.maturity_period = bond_info.get('maturity', 10)
 
-
     def display_bond_details(self):
-        """
-        Display details of the selected bond.
-        """
-        # Display details of the selected bond.
-        st.write("### Selected Bond Details:")
-        st.write(f"**Symbol:** {self.bond_symbol}")
-        st.write(f"**Face Value:** ${self.face_value:.2f}")
-        st.write(f"**Coupon Rate:** {self.coupon_rate:.2f}%")
-        st.write(f"**Maturity Period:** {self.maturity_period} years")
+        st.sidebar.write("### Selected Bond Details:")
+        st.sidebar.write(f"**Symbol:** {self.bond_symbol}")
+        st.sidebar.write(f"**Face Value:** ${self.face_value:.2f}")
+        st.sidebar.write(f"**Coupon Rate:** {self.coupon_rate:.2f}%")
+        st.sidebar.write(f"**Maturity Period:** {self.maturity_period} years")
 
     def plot_last_price_chart(self):
         """
@@ -181,30 +140,22 @@ class BondApp:
         return modified_duration
 
     def get_simulation_parameters(self):
-        """
-        Get simulation parameters from the user.
-        """
-        # Input fields for scenario analysis parameters.
-        self.num_simulations = st.number_input("Number of Monte Carlo Simulations", value=10000, step=1000)
-        self.mean_yield = st.number_input("Mean Yield Rate (%)", value=5.0, step=0.1)
-        self.volatility = st.number_input("Volatility of Yield Rates (%)", value=1.0, step=0.1)
+        self.num_simulations = st.sidebar.number_input("Number of Monte Carlo Simulations", value=10000, step=1000)
+        self.mean_yield = st.sidebar.number_input("Mean Yield Rate (%)", value=5.0, step=0.1)
+        self.volatility = st.sidebar.number_input("Volatility of Yield Rates (%)", value=1.0, step=0.1)
 
     def run_scenario_analysis(self):
-        """
-        Run scenario analysis and display results.
-        """
-        # Instructions for scenario analysis.
-        st.header("Scenario Analysis")
-        st.write("Explore different scenarios to understand how changes in yield rates and volatility affect bond prices.")
-        st.write("Adjust the parameters below and click 'Run Scenario Analysis' to initiate the analysis.")
+        st.sidebar.header("Scenario Analysis")
+        st.sidebar.write("Explore different scenarios to understand how changes in yield rates and volatility affect bond prices.")
+        st.sidebar.write("Adjust the parameters below and click 'Run Scenario Analysis' to initiate the analysis.")
 
-        scenarios = {
-            "Base Scenario": (self.mean_yield, self.volatility),
-            "High Volatility": (self.mean_yield, self.volatility + 1),
-            "Low Yield": (self.mean_yield - 1, self.volatility),
-        }
-        # Button to run scenario analysis.
-        if st.button("Run Scenario Analysis"):
+        if st.sidebar.button("Run Scenario Analysis"):
+            scenarios = {
+                "Base Scenario": (self.mean_yield, self.volatility),
+                "High Volatility": (self.mean_yield, self.volatility + 1),
+                "Low Yield": (self.mean_yield - 1, self.volatility),
+            }
+
             for scenario_name, (mean_yield, volatility) in scenarios.items():
                 bond_prices = self.price_bond(mean_yield, volatility)
                 self.display_scenario_analysis(scenario_name, bond_prices)
@@ -304,21 +255,17 @@ class BondApp:
         df.to_csv(f"{scenario_name}_results.csv", index=False)
 
     def run_sensitivity_analysis(self):
-        """
-        Run sensitivity analysis and display results.
-        """
-        # Instructions for sensitivity analysis.
-        st.header("Sensitivity Analysis")
-        st.write("Analyze how changes in coupon rates and maturity periods impact bond prices.")
-        st.write("Click 'Run Sensitivity Analysis' to initiate the analysis.")
-        parameters = ["coupon_rate", "maturity_period"]
-        values = {
-            "coupon_rate": [4, 5, 6],
-            "maturity_period": [5, 10, 15],
-        }
-        # Button to run sensitivity analysis.
-        if st.button("Run Sensitivity Analysis"):
-                # Perform sensitivity analysis and display results.
+        st.sidebar.header("Sensitivity Analysis")
+        st.sidebar.write("Analyze how changes in coupon rates and maturity periods impact bond prices.")
+        st.sidebar.write("Click 'Run Sensitivity Analysis' to initiate the analysis.")
+
+        if st.sidebar.button("Run Sensitivity Analysis"):
+            parameters = ["coupon_rate", "maturity_period"]
+            values = {
+                "coupon_rate": [4, 5, 6],
+                "maturity_period": [5, 10, 15],
+            }
+
             for param_name in parameters:
                 for value in values[param_name]:
                     setattr(self, param_name, value)
@@ -437,34 +384,25 @@ class BondApp:
 
     # News analysis part.
     def fetch_and_analyze_news(self):
-        """
-        Fetch news articles related to the selected bond and perform summarization and sentiment analysis.
-        """
-        # Create sentiment analysis pipeline
+        st.sidebar.write(f"### News and sentiment of {self.bond_symbol}")
+
+        if st.sidebar.button("Get News Summary and Sentiment"):
+            self.fetch_and_analyze_news_internal()
+
+    def fetch_and_analyze_news_internal(self):
         sentiment_analyzer = pipeline("sentiment-analysis")
 
-        # Display spinner while fetching news data
         with st.spinner("Fetching news data and performing analysis..."):
-            # Fetch news articles related to the selected bond.
             monitored_tickers = [self.bond_symbol]
             raw_urls = {ticker: self.search_for_stock_news_urls(ticker) for ticker in monitored_tickers}
             exclude_list = ['maps', 'policies', 'preferences', 'accounts', 'support']
             cleaned_urls = {ticker: self.strip_unwanted_urls(raw_urls[ticker], exclude_list) for ticker in monitored_tickers}
             articles = {ticker: self.scrape_and_process(cleaned_urls[ticker]) for ticker in monitored_tickers}
-
-            # Summarize articles.
             summaries = {ticker: self.summarize(articles[ticker]) for ticker in monitored_tickers}
-
-            # Perform sentiment analysis.
             scores = {ticker: sentiment_analyzer(summaries[ticker]) for ticker in monitored_tickers}
-
-            # Create final output.
             final_output = self.create_output_array(summaries, scores, cleaned_urls)
-
-            # Convert final_output to DataFrame
             df = pd.DataFrame(final_output, columns=["Ticker", "Summary", "Sentiment", "Score", "URL"])
 
-            # Display final output.
             st.write("### News Summary and Sentiment Analysis:")
             st.table(df.style.set_properties(**{'font-size': '12px', 'text-align': 'left'}))
 
