@@ -13,12 +13,6 @@ from fpdf import FPDF
 from transformers import PegasusTokenizer, PegasusForConditionalGeneration, logging, pipeline
 from bs4 import BeautifulSoup
 import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import WebDriverException
 import numba
 import re
 import torch
@@ -411,13 +405,12 @@ class BondApp:
         st.sidebar.write(f"### News and sentiment of {self.bond_symbol}")
 
         if st.sidebar.button("Get News Summary and Sentiment"):
-            st.write("It takes approximately 30 seconds.")
             self.fetch_and_analyze_news_internal()
     
     def fetch_and_analyze_news_internal(self):
         sentiment_analyzer = pipeline("sentiment-analysis")
 
-        with st.spinner("Fetching news data and performing analysis..."):
+        with st.spinner("Fetching news data and performing analysis... It will take approximately 30 seconds!"):
             monitored_tickers = [self.bond_symbol]
             raw_urls = {ticker: self.search_for_stock_news_urls(ticker) for ticker in monitored_tickers}
             exclude_list = ['maps', 'policies', 'preferences', 'accounts', 'support']
@@ -476,40 +469,18 @@ class BondApp:
         """
         Scrape and process unwanted URLs.
         """
-        st.write("Cleaning up articles...")
-        self.chrome_options = Options()
-        # Add any additional options if needed
-        self.chrome_options.add_argument("--headless")
-        # Initialize a Chrome WebDriver (you can use other browsers as well).
-        try:
-            driver = webdriver.Chrome(options=self.chrome_options)
-            
-            ARTICLES = []
-            for url in URLs: 
-                driver.get(url)
-                
-                try:
-                    # Wait for consent popup to appear (adjust timeout as needed).
-                    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="consent-popup"]/button'))).click()
-                except:
-                    # If no consent popup is found, continue scraping.
-                    pass
+        st.write("Reading articles...")
 
-                # Now the consent popup should be dismissed, continue scraping.
-                soup = BeautifulSoup(driver.page_source, 'html.parser')
-                paragraphs = soup.find_all('p')
-                text = [paragraph.text for paragraph in paragraphs]
-                words = ' '.join(text).split(' ')[:100]
-                ARTICLE = ' '.join(words)
-                ARTICLES.append(ARTICLE)
-
-            # Close the WebDriver once scraping is done.
-            driver.quit()
-
-            return ARTICLES
-        except WebDriverException as e:
-            st.error("An error occurred while scraping articles. Please try again later.")
-            return []
+        ARTICLES = []
+        for url in URLs: 
+            r = requests.get(url)
+            soup = BeautifulSoup(r.text, 'html.parser')
+            paragraphs = soup.find_all('p')
+            text = [paragraph.text for paragraph in paragraphs]
+            words = ' '.join(text).split(' ')[:100]
+            ARTICLE = ' '.join(words)
+            ARTICLES.append(ARTICLE)
+        return ARTICLES
     
     def summarize(self, articles):
         """
