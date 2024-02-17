@@ -17,6 +17,8 @@ import requests
 import numba
 import re
 import torch
+import sentencepiece
+import tensorflow
 from transformers import logging
 logging.set_verbosity_error()
 
