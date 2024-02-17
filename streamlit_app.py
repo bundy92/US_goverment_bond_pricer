@@ -56,7 +56,7 @@ class BondApp:
 
     def fetch_bond_data(self):
         bond_data = yf.Ticker(self.bond_symbol)
-        st.write(bond_data)
+        st.write(bond_info)
         bond_info = bond_data.info
 
         self.face_value = bond_info.get('previousClose', 0)
@@ -405,6 +405,7 @@ class BondApp:
         """
         Search for stock news URLs using Google.
         """
+        st.write("Searching for news...")
         search_url = "https://www.google.com/search?q=yahoo+finance+{}&tbm=nws".format(ticker)
         #search_url = "https://www.ecosia.org/news?q=yahoo%20finance%20{}".format(ticker)
         #headers = {"User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0"}
@@ -432,7 +433,7 @@ class BondApp:
         """
         Strip out unwanted URLs.
         """
-        st.write("Cleaning up URLs.")
+        st.write("Cleaning up URLs...")
         val = []
         for url in urls: 
             if 'https://' in url and not any(exclude_word in url for exclude_word in exclude_list):
