@@ -59,11 +59,12 @@ class BondApp:
         self.select_bond()
         self.fetch_bond_data()
         self.display_bond_details()
-        self.plot_last_price_chart()
-        self.get_simulation_parameters()
         self.fetch_and_analyze_news()
         self.run_scenario_analysis()
         self.run_sensitivity_analysis()
+        self.plot_last_price_chart()
+        self.get_simulation_parameters()
+
         
 
     def select_bond(self):
