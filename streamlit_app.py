@@ -52,18 +52,19 @@ class BondApp:
         }
 
     def run(self):
-        st.set_page_config(layout="centered", initial_sidebar_state="expanded")
+        st.set_page_config(layout="wide", initial_sidebar_state="expanded")
         st.sidebar.title("US Government Bond Pricer")
-        st.sidebar.write("This tool allows you to do basic analyzis US government bonds.")
+        st.sidebar.write("This tool allows you to do basic analyzis of US government bonds.")
 
         self.select_bond()
         self.fetch_bond_data()
         self.display_bond_details()
         self.plot_last_price_chart()
         self.get_simulation_parameters()
+        self.fetch_and_analyze_news()
         self.run_scenario_analysis()
         self.run_sensitivity_analysis()
-        self.fetch_and_analyze_news()
+        
 
     def select_bond(self):
         self.bond_symbol = st.sidebar.selectbox("Select US Government Bond Symbol", ["^IRX", "^FVX", "^TNX", "^TYX"])
@@ -86,9 +87,9 @@ class BondApp:
         st.sidebar.write(f"**Symbol:** {self.bond_symbol}")
         st.sidebar.write(f"**Name:** {self.long_name}")
         st.sidebar.write(f"**Face Value:** ${self.face_value:.2f}")
-        st.sidebar.write(f"**50 day average:** ${self.face_value:.2f}")
-        st.sidebar.write(f"**200 day average:** ${self.face_value:.2f}")
-        st.sidebar.write(f"**Coupon Rate:** ${self.coupon_rate:.2f}")
+        st.sidebar.write(f"**50 day average:** ${self.fifty_day_avg:.2f}")
+        st.sidebar.write(f"**200 day average:** ${self.two_hundred_day_avg:.2f}")
+        st.sidebar.write(f"**Coupon Rate (0$ if N/A):** ${self.coupon_rate:.2f}")
         st.sidebar.write(f"**Maturity Period:** {self.maturity_period} years")
 
     def plot_last_price_chart(self):
@@ -166,13 +167,6 @@ class BondApp:
         self.num_simulations = st.sidebar.number_input("Number of Monte Carlo Simulations", value=10000, step=1000)
         self.mean_yield = st.sidebar.number_input("Mean Yield Rate (%)", value=5.0, step=0.1)
         self.volatility = st.sidebar.number_input("Volatility of Yield Rates (%)", value=1.0, step=0.1)
-
-    def fetch_and_analyze_news(self):
-        st.sidebar.write(f"### News and sentiment of {self.bond_symbol}")
-
-        if st.sidebar.button("Get News Summary and Sentiment"):
-            self.fetch_and_analyze_news_internal()
-
 
     def run_scenario_analysis(self):
         st.sidebar.header("Scenario Analysis")
@@ -406,6 +400,12 @@ class BondApp:
         st.altair_chart(line_chart, use_container_width=True)
 
     # News analysis part.
+    def fetch_and_analyze_news(self):
+        st.sidebar.write(f"### News and sentiment of {self.bond_symbol}")
+
+        if st.sidebar.button("Get News Summary and Sentiment"):
+            self.fetch_and_analyze_news_internal()
+    
     def fetch_and_analyze_news_internal(self):
         sentiment_analyzer = pipeline("sentiment-analysis")
 
