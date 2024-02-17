@@ -169,7 +169,7 @@ class BondApp:
     def get_simulation_parameters(self):
         st.write("Adjust the paramters of the simulation!")
         self.num_simulations = st.sidebar.number_input("Number of Monte Carlo Simulations", value=10000, step=1000)
-        self.mean_yield = st.sidebar.number_input("Mean Yield Rate (%)", value=self.face_value, step=0.1)
+        self.mean_yield = st.sidebar.number_input("Mean Yield Rate (%)", value=float(self.face_value), step=0.1)
         self.volatility = st.sidebar.number_input("Volatility of Yield Rates (%)", value=1.0, step=0.1)
 
     def run_scenario_analysis(self):
