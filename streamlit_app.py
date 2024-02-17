@@ -57,13 +57,14 @@ class BondApp:
         st.sidebar.write("This tool allows you to do basic analyzis of US government bonds.")
 
         self.select_bond()
+        self.get_simulation_parameters()        
         self.fetch_bond_data()
         self.display_bond_details()
         self.fetch_and_analyze_news()
         self.run_scenario_analysis()
         self.run_sensitivity_analysis()
         self.plot_last_price_chart()
-        self.get_simulation_parameters()
+
 
         
 
@@ -166,6 +167,7 @@ class BondApp:
         return modified_duration
 
     def get_simulation_parameters(self):
+        st.write("Adjust the paramters of the simulation!")
         self.num_simulations = st.sidebar.number_input("Number of Monte Carlo Simulations", value=10000, step=1000)
         self.mean_yield = st.sidebar.number_input("Mean Yield Rate (%)", value=5.0, step=0.1)
         self.volatility = st.sidebar.number_input("Volatility of Yield Rates (%)", value=1.0, step=0.1)
