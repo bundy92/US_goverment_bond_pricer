@@ -497,7 +497,7 @@ class BondApp:
         summaries = []
         for article in articles:
             input_ids = tokenizer.encode(article, return_tensors='pt').to(device)
-            output = model.generate(input_ids, max_length=50, num_beams=5, early_stopping=True)
+            output = model.generate(input_ids, max_length=30, num_beams=3, early_stopping=True)
             summary = tokenizer.decode(output[0], skip_special_tokens=True)
             summaries.append(summary)
         return summaries
