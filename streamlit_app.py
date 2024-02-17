@@ -74,7 +74,7 @@ class BondApp:
 
         self.long_name = bond_info.get('tlongName', None)
         self.face_value = bond_info.get('previousClose', 0)
-        self.coupon_rate = bond_info.get('couponRate', None) * 100
+        self.coupon_rate = bond_info.get('couponRate', 0) * 100
         # Default maturity period is 10 years.
         self.maturity_period = self.maturity_periods.get(self.bond_symbol, 10)
         self.fifty_day_avg = bond_info.get('fiftyDayAverage', None)
