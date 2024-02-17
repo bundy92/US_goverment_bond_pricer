@@ -31,6 +31,7 @@ class BondApp:
         # Bond info.
         self.bond_symbol = None
         self.long_name = ""
+        self.short_name = ""
         self.face_value = None
         self.coupon_rate = None
         self.maturity_period = None
@@ -74,6 +75,7 @@ class BondApp:
         bond_info = bond_data.info
 
         self.long_name = bond_info.get('longName')
+        self.short_name = bond_info.get('shortName')
         self.face_value = bond_info.get('previousClose', 0)
         self.coupon_rate = bond_info.get('couponRate', 0) * 100
         # Default maturity period is 10 years.
@@ -85,11 +87,11 @@ class BondApp:
     def display_bond_details(self):
         st.sidebar.write("### Bond Details:")
         st.sidebar.write(f"**Symbol:** {self.bond_symbol}")
-        st.sidebar.write(f"**Name:** {self.long_name}")
+        st.sidebar.write(f"**Name:** {self.short_name}")
         st.sidebar.write(f"**Face Value:** ${self.face_value:.2f}")
         st.sidebar.write(f"**50 day average:** ${self.fifty_day_avg:.2f}")
         st.sidebar.write(f"**200 day average:** ${self.two_hundred_day_avg:.2f}")
-        st.sidebar.write(f"**Coupon Rate (0$ if N/A):** ${self.coupon_rate:.2f}")
+        st.sidebar.write(f"**Coupon Rate 0 if NA:** ${self.coupon_rate:.2f}")
         st.sidebar.write(f"**Maturity Period:** {self.maturity_period} years")
 
     def plot_last_price_chart(self):
