@@ -18,6 +18,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import WebDriverException
 import numba
 import re
 import torch
@@ -476,16 +477,17 @@ class BondApp:
         Scrape and process unwanted URLs.
         """
         st.write("Cleaning up articles...")
-        
-        # Initialize Chrome WebDriver with options
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")  # Run Chrome in headless mode
-        driver = webdriver.Chrome(options=chrome_options)
-        
-        ARTICLES = []
-        for url in URLs:
-            try:
+        self.chrome_options = Options()
+        # Add any additional options if needed
+        self.chrome_options.add_argument("--headless")
+        # Initialize a Chrome WebDriver (you can use other browsers as well).
+        try:
+            driver = webdriver.Chrome(options=self.chrome_options)
+            
+            ARTICLES = []
+            for url in URLs: 
                 driver.get(url)
+                
                 try:
                     # Wait for consent popup to appear (adjust timeout as needed).
                     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="consent-popup"]/button'))).click()
@@ -500,16 +502,14 @@ class BondApp:
                 words = ' '.join(text).split(' ')[:100]
                 ARTICLE = ' '.join(words)
                 ARTICLES.append(ARTICLE)
-            except Exception as e:
-                # Log the exception or handle it appropriately
-                st.error(f"Error scraping {url}: {str(e)}")
-                # Continue to the next URL
-                continue
 
-        # Close the WebDriver once scraping is done.
-        driver.quit()
+            # Close the WebDriver once scraping is done.
+            driver.quit()
 
-        return ARTICLES
+            return ARTICLES
+        except WebDriverException as e:
+            st.error("An error occurred while scraping articles. Please try again later.")
+            return []
     
     def summarize(self, articles):
         """
