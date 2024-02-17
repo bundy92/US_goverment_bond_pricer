@@ -477,31 +477,34 @@ class BondApp:
         """
         st.write("Cleaning up articles...")
         
-        # Configure Chrome WebDriver options for headless mode
+        # Initialize Chrome WebDriver with options
         chrome_options = Options()
-        chrome_options.add_argument('--headless')
-        
-        # Initialize a Chrome WebDriver in headless mode
+        chrome_options.add_argument("--headless")  # Run Chrome in headless mode
         driver = webdriver.Chrome(options=chrome_options)
         
         ARTICLES = []
-        for url in URLs: 
-            driver.get(url)
-            
+        for url in URLs:
             try:
-                # Wait for consent popup to appear (adjust timeout as needed).
-                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="consent-popup"]/button'))).click()
-            except:
-                # If no consent popup is found, continue scraping.
-                pass
+                driver.get(url)
+                try:
+                    # Wait for consent popup to appear (adjust timeout as needed).
+                    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="consent-popup"]/button'))).click()
+                except:
+                    # If no consent popup is found, continue scraping.
+                    pass
 
-            # Now the consent popup should be dismissed, continue scraping.
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-            paragraphs = soup.find_all('p')
-            text = [paragraph.text for paragraph in paragraphs]
-            words = ' '.join(text).split(' ')[:100]
-            ARTICLE = ' '.join(words)
-            ARTICLES.append(ARTICLE)
+                # Now the consent popup should be dismissed, continue scraping.
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                paragraphs = soup.find_all('p')
+                text = [paragraph.text for paragraph in paragraphs]
+                words = ' '.join(text).split(' ')[:100]
+                ARTICLE = ' '.join(words)
+                ARTICLES.append(ARTICLE)
+            except Exception as e:
+                # Log the exception or handle it appropriately
+                st.error(f"Error scraping {url}: {str(e)}")
+                # Continue to the next URL
+                continue
 
         # Close the WebDriver once scraping is done.
         driver.quit()
