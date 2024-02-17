@@ -14,6 +14,7 @@ from transformers import PegasusTokenizer, PegasusForConditionalGeneration, logg
 from bs4 import BeautifulSoup
 import requests
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -476,8 +477,12 @@ class BondApp:
         """
         st.write("Cleaning up articles...")
         
-        # Initialize a Chrome WebDriver (you can use other browsers as well).
-        driver = webdriver.Chrome()
+        # Configure Chrome WebDriver options for headless mode
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        
+        # Initialize a Chrome WebDriver in headless mode
+        driver = webdriver.Chrome(options=chrome_options)
         
         ARTICLES = []
         for url in URLs: 
