@@ -30,7 +30,7 @@ class BondApp:
     def __init__(self):
         # Bond info.
         self.bond_symbol = None
-        self.long_name = None
+        self.long_name = ""
         self.face_value = None
         self.coupon_rate = None
         self.maturity_period = None
@@ -72,7 +72,7 @@ class BondApp:
         bond_data = yf.Ticker(self.bond_symbol)
         bond_info = bond_data.info
 
-        self.long_name = bond_info.get('tlongName', None)
+        self.long_name = bond_info.get('tlongName')
         self.face_value = bond_info.get('previousClose', 0)
         self.coupon_rate = bond_info.get('couponRate', 0) * 100
         # Default maturity period is 10 years.
