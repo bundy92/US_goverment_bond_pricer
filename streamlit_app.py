@@ -72,7 +72,7 @@ class BondApp:
         bond_data = yf.Ticker(self.bond_symbol)
         bond_info = bond_data.info
 
-        self.long_name = bond_info.get('tlongName')
+        self.long_name = bond_info.get('longName')
         self.face_value = bond_info.get('previousClose', 0)
         self.coupon_rate = bond_info.get('couponRate', 0) * 100
         # Default maturity period is 10 years.
@@ -166,6 +166,13 @@ class BondApp:
         self.num_simulations = st.sidebar.number_input("Number of Monte Carlo Simulations", value=10000, step=1000)
         self.mean_yield = st.sidebar.number_input("Mean Yield Rate (%)", value=5.0, step=0.1)
         self.volatility = st.sidebar.number_input("Volatility of Yield Rates (%)", value=1.0, step=0.1)
+
+    def fetch_and_analyze_news(self):
+        st.sidebar.write(f"### News and sentiment of {self.bond_symbol}")
+
+        if st.sidebar.button("Get News Summary and Sentiment"):
+            self.fetch_and_analyze_news_internal()
+
 
     def run_scenario_analysis(self):
         st.sidebar.header("Scenario Analysis")
@@ -399,12 +406,6 @@ class BondApp:
         st.altair_chart(line_chart, use_container_width=True)
 
     # News analysis part.
-    def fetch_and_analyze_news(self):
-        st.sidebar.write(f"### News and sentiment of {self.bond_symbol}")
-
-        if st.sidebar.button("Get News Summary and Sentiment"):
-            self.fetch_and_analyze_news_internal()
-
     def fetch_and_analyze_news_internal(self):
         sentiment_analyzer = pipeline("sentiment-analysis")
 
