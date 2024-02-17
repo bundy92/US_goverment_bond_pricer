@@ -56,9 +56,9 @@ class BondApp:
         st.sidebar.title("US Government Bond Pricer")
         st.sidebar.write("This tool allows you to do basic analyzis of US government bonds.")
 
-        self.select_bond()
-        self.get_simulation_parameters()        
+        self.select_bond()        
         self.fetch_bond_data()
+        self.get_simulation_parameters()
         self.display_bond_details()
         self.fetch_and_analyze_news()
         self.run_scenario_analysis()
