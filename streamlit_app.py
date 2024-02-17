@@ -9,6 +9,7 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 import plotly.express as px
+import plotly.graph_objects as go
 from fpdf import FPDF
 from transformers import PegasusTokenizer, PegasusForConditionalGeneration, logging, pipeline
 from bs4 import BeautifulSoup
@@ -105,7 +106,29 @@ class BondApp:
         history = bond_data.history(period="1y")
         if not history.empty:
             st.write("### Last Price Chart:")
-            st.line_chart(history['Close'])
+            
+            # Create a Plotly figure
+            fig = go.Figure()
+            
+            # Add trace for last price
+            fig.add_trace(go.Scatter(x=history.index, y=history['Close'], mode='lines', name='Last Price'))
+            
+            # Update layout
+            fig.update_layout(
+                title=f'Last Price Chart - {self.long_name}',
+                xaxis_title='Date',
+                yaxis_title='Price',
+                xaxis=dict(tickangle=45),
+                yaxis=dict(gridcolor='lightgrey'),
+                plot_bgcolor='rgba(0,0,0,0)',
+                legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
+                margin=dict(l=20, r=20, t=60, b=20),
+                hovermode="x",
+            )
+            
+            # Show plotly figure
+            st.plotly_chart(fig)
+            
         else:
             st.write("Last price data not available for selected bond.")
 
