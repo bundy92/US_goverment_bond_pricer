@@ -10,14 +10,17 @@ import pandas as pd
 import altair as alt
 import plotly.express as px
 from fpdf import FPDF
-from transformers import PegasusTokenizer, PegasusForConditionalGeneration, pipeline
+from transformers import PegasusTokenizer, PegasusForConditionalGeneration, logging, pipeline
 from bs4 import BeautifulSoup
 import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import numba
 import re
 import torch
 import sentencepiece
-from transformers import logging
 
 logging.set_verbosity_error()
 
@@ -472,17 +475,33 @@ class BondApp:
         """
         st.write("Cleaning up articles...")
         
+        # Initialize a Chrome WebDriver (you can use other browsers as well)
+        driver = webdriver.Chrome()
+        
         ARTICLES = []
         for url in URLs: 
-            r = requests.get(url)
-            soup = BeautifulSoup(r.text, 'html.parser')
+            driver.get(url)
+            
+            try:
+                # Wait for consent popup to appear (adjust timeout as needed)
+                WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="consent-popup"]/button'))).click()
+            except:
+                # If no consent popup is found, continue scraping
+                pass
+
+            # Now the consent popup should be dismissed, continue scraping
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
             paragraphs = soup.find_all('p')
             text = [paragraph.text for paragraph in paragraphs]
-            words = ' '.join(text).split(' ')[:200]
+            words = ' '.join(text).split(' ')[:100]
             ARTICLE = ' '.join(words)
             ARTICLES.append(ARTICLE)
-        return ARTICLES
 
+        # Close the WebDriver once scraping is done
+        driver.quit()
+
+        return ARTICLES
+    
     def summarize(self, articles):
         """
         Summarize articles.
