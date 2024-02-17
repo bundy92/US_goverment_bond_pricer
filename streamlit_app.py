@@ -56,12 +56,12 @@ class BondApp:
 
     def fetch_bond_data(self):
         bond_data = yf.Ticker(self.bond_symbol)
-        st.write(bond_info)
         bond_info = bond_data.info
 
         self.face_value = bond_info.get('previousClose', 0)
         self.coupon_rate = bond_info.get('couponRate', 5.0) * 100
         self.maturity_period = bond_info.get('maturity', 10)
+        st.write(bond_info)
 
     def display_bond_details(self):
         st.sidebar.write("### Selected Bond Details:")
