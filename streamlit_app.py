@@ -409,6 +409,7 @@ class BondApp:
         st.sidebar.write(f"### News and sentiment of {self.bond_symbol}")
 
         if st.sidebar.button("Get News Summary and Sentiment"):
+            st.write("It takes approximately 30 seconds.")
             self.fetch_and_analyze_news_internal()
     
     def fetch_and_analyze_news_internal(self):
@@ -475,7 +476,7 @@ class BondApp:
         """
         st.write("Cleaning up articles...")
         
-        # Initialize a Chrome WebDriver (you can use other browsers as well)
+        # Initialize a Chrome WebDriver (you can use other browsers as well).
         driver = webdriver.Chrome()
         
         ARTICLES = []
@@ -483,13 +484,13 @@ class BondApp:
             driver.get(url)
             
             try:
-                # Wait for consent popup to appear (adjust timeout as needed)
+                # Wait for consent popup to appear (adjust timeout as needed).
                 WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="consent-popup"]/button'))).click()
             except:
-                # If no consent popup is found, continue scraping
+                # If no consent popup is found, continue scraping.
                 pass
 
-            # Now the consent popup should be dismissed, continue scraping
+            # Now the consent popup should be dismissed, continue scraping.
             soup = BeautifulSoup(driver.page_source, 'html.parser')
             paragraphs = soup.find_all('p')
             text = [paragraph.text for paragraph in paragraphs]
@@ -497,7 +498,7 @@ class BondApp:
             ARTICLE = ' '.join(words)
             ARTICLES.append(ARTICLE)
 
-        # Close the WebDriver once scraping is done
+        # Close the WebDriver once scraping is done.
         driver.quit()
 
         return ARTICLES
@@ -507,7 +508,7 @@ class BondApp:
         Summarize articles.
         """
         # Setup summarization model
-        model_name = "human-centered-summarization/financial-summarization-pegasus"  # Model for summarization
+        model_name = "human-centered-summarization/financial-summarization-pegasus"  
         tokenizer = PegasusTokenizer.from_pretrained(model_name)
         model = PegasusForConditionalGeneration.from_pretrained(model_name).to(device)
 
@@ -516,7 +517,7 @@ class BondApp:
         summaries = []
         for article in articles:
             input_ids = tokenizer.encode(article, return_tensors='pt').to(device)
-            output = model.generate(input_ids, max_length=30, num_beams=3, early_stopping=True)
+            output = model.generate(input_ids, max_length=20, num_beams=2, early_stopping=True)
             summary = tokenizer.decode(output[0], skip_special_tokens=True)
             summaries.append(summary)
         return summaries
@@ -540,7 +541,7 @@ class BondApp:
         return output
 
 
-# Run the application, main entry.
+# Run the application, main entry point.
 if __name__ == "__main__":
     bond_app = BondApp()
     bond_app.run()
