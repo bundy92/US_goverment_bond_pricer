@@ -28,19 +28,33 @@ else:
 
 class BondApp:
     def __init__(self):
+        # Bond info.
         self.bond_symbol = None
+        self.long_name = None
         self.face_value = None
         self.coupon_rate = None
         self.maturity_period = None
+        self.fifty_day_avg = None
+        self.two_hundred_day_avg = None
+        
+        # Simulation info.
         self.num_simulations = None
         self.mean_yield = None
         self.volatility = None
         self.bond_pricer = None
 
+        # Dictionary mapping bond symbols to maturity periods.
+        self.maturity_periods = {
+            "^IRX": 1,
+            "^FVX": 5,
+            "^TNX": 10,
+            "^TYX": 30
+        }
+
     def run(self):
         st.set_page_config(layout="centered", initial_sidebar_state="expanded")
         st.sidebar.title("US Government Bond Pricer")
-        st.sidebar.write("Welcome to the Government Bond Pricer! This tool allows you to analyze and price US government bonds.")
+        st.sidebar.write("This tool allows you to do basic analyzis US government bonds.")
 
         self.select_bond()
         self.fetch_bond_data()
@@ -58,22 +72,30 @@ class BondApp:
         bond_data = yf.Ticker(self.bond_symbol)
         bond_info = bond_data.info
 
+        self.long_name = bond_info.get('tlongName', None)
         self.face_value = bond_info.get('previousClose', 0)
-        self.coupon_rate = bond_info.get('couponRate', 5.0) * 100
-        self.maturity_period = bond_info.get('maturity', 10)
-        st.write(bond_info)
+        self.coupon_rate = bond_info.get('couponRate', None) * 100
+        # Default maturity period is 10 years.
+        self.maturity_period = self.maturity_periods.get(self.bond_symbol, 10)
+        self.fifty_day_avg = bond_info.get('fiftyDayAverage', None)
+        self.two_hundred_day_avg = bond_info.get('twoHundredDayAverage', None)
+        
 
     def display_bond_details(self):
-        st.sidebar.write("### Selected Bond Details:")
+        st.sidebar.write("### Bond Details:")
         st.sidebar.write(f"**Symbol:** {self.bond_symbol}")
+        st.sidebar.write(f"**Name:** {self.long_name}")
         st.sidebar.write(f"**Face Value:** ${self.face_value:.2f}")
-        st.sidebar.write(f"**Coupon Rate:** {self.coupon_rate:.2f}%")
+        st.sidebar.write(f"**50 day average:** ${self.face_value:.2f}")
+        st.sidebar.write(f"**200 day average:** ${self.face_value:.2f}")
+        st.sidebar.write(f"**Coupon Rate:** ${self.coupon_rate:.2f}")
         st.sidebar.write(f"**Maturity Period:** {self.maturity_period} years")
 
     def plot_last_price_chart(self):
         """
         Plot chart of the last price of the selected bond.
         """
+        st.title(self.long_name)
         # Plot chart of the last price of the selected bond.
         bond_data = yf.Ticker(self.bond_symbol)
         history = bond_data.history(period="1y")
