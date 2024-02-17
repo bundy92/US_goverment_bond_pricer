@@ -17,7 +17,6 @@ import numba
 import re
 import torch
 import sentencepiece
-#import tensorflow
 from transformers import logging
 
 logging.set_verbosity_error()
@@ -39,13 +38,14 @@ class BondApp:
         self.bond_pricer = None
 
     def run(self):
-        st.set_page_config(layout="wide", initial_sidebar_state="expanded")
-        st.sidebar.title("Government Bond Pricer")
+        st.set_page_config(layout="centered", initial_sidebar_state="expanded")
+        st.sidebar.title("US Government Bond Pricer")
         st.sidebar.write("Welcome to the Government Bond Pricer! This tool allows you to analyze and price US government bonds.")
 
         self.select_bond()
         self.fetch_bond_data()
         self.display_bond_details()
+        self.plot_last_price_chart()
         self.get_simulation_parameters()
         self.run_scenario_analysis()
         self.run_sensitivity_analysis()
@@ -56,6 +56,7 @@ class BondApp:
 
     def fetch_bond_data(self):
         bond_data = yf.Ticker(self.bond_symbol)
+        st.write(bond_data)
         bond_info = bond_data.info
 
         self.face_value = bond_info.get('previousClose', 0)
@@ -366,13 +367,6 @@ class BondApp:
     #     plt.ylabel("Frequency")
     #     st.pyplot()
 
-    def plot_histogram(self, bond_prices):
-        """
-        Plot histogram of bond prices using Plotly for interactive visualization.
-        """
-        fig = px.histogram(x=bond_prices, nbins=30, labels={'x': 'Bond Price', 'y': 'Frequency'}, title='Bond Price Distribution')
-        st.plotly_chart(fig)
-
     def plot_line_chart(self, data):
         """
         Plot line chart of bond prices.
@@ -433,11 +427,12 @@ class BondApp:
     #     hrefs = [link['href'] for link in atags]
     #     return hrefs 
 
-    print("Cleaning up URLs.")
+    
     def strip_unwanted_urls(self, urls, exclude_list):
         """
         Strip out unwanted URLs.
         """
+        st.write("Cleaning up URLs.")
         val = []
         for url in urls: 
             if 'https://' in url and not any(exclude_word in url for exclude_word in exclude_list):
@@ -449,6 +444,8 @@ class BondApp:
         """
         Scrape and process unwanted URLs.
         """
+        st.write("Cleaning up articles...")
+        
         ARTICLES = []
         for url in URLs: 
             r = requests.get(url)
@@ -469,7 +466,7 @@ class BondApp:
         tokenizer = PegasusTokenizer.from_pretrained(model_name)
         model = PegasusForConditionalGeneration.from_pretrained(model_name).to(device)
 
-        st.write("Fetching news data and performing analysis...")
+        st.write("Summarizing articles...")
 
         summaries = []
         for article in articles:
@@ -483,6 +480,7 @@ class BondApp:
         """
         Create output array.
         """
+        st.write("Creating output...")
         output = []
         for ticker in urls:
             for counter in range(len(summaries[ticker])):
