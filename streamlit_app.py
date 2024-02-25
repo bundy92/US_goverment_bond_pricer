@@ -18,9 +18,11 @@ import numba
 import re
 import torch
 import sentencepiece
+from scipy.optimize import curve_fit
 
+# Turning off error message.
 logging.set_verbosity_error()
-
+# Setting up ML device.
 if torch.cuda.is_available():
     device = "cuda"
 else:
@@ -66,8 +68,6 @@ class BondApp:
         self.run_sensitivity_analysis()
         self.plot_last_price_chart()
 
-
-        
 
     def select_bond(self):
         self.bond_symbol = st.sidebar.selectbox("Select US Government Bond Symbol", ["^IRX", "^FVX", "^TNX", "^TYX"])
@@ -405,6 +405,42 @@ class BondApp:
         present_value = sum([cf / ((1 + yield_rate / 100) ** t) for t, cf in enumerate([self.coupon_rate / 100 * self.face_value] * int(self.maturity_period))]) + self.face_value / ((1 + yield_rate / 100) ** self.maturity_period)
         return present_value
     
+    def DCF_calc_bond(self, bond_info):
+        """
+        Calculate the bond price using the DCF method.
+        """
+        # Define bond parameters
+        face_value = 1000
+        coupon_rate = 0.05
+        years_to_maturity = 5
+        discount_rate = 0.03
+
+        # Calculate annual coupon payment
+        annual_coupon_payment = face_value * coupon_rate
+
+        # Calculate bond price using DCF method
+        discounted_cash_flows = [annual_coupon_payment] * years_to_maturity
+        discounted_cash_flows[-1] += face_value
+        bond_price_dcf = sum([cf / (1 + discount_rate) ** (i + 1) for i, cf in enumerate(discounted_cash_flows)])
+
+        print("Bond Price using DCF Analysis:", round(bond_price_dcf, 2))
+
+    def yield_curve_analysis(self, bond_info):
+        
+
+        # Hypothetical yield curve data (example)
+        maturities = [1, 5, 10]  # Maturities in years
+        yields = [0.02, 0.025, 0.03]  # Corresponding yields
+
+        # Fit yield curve using Nelson-Siegel model (example)
+        def nelson_siegel_curve(t, b0, b1, b2, tau):
+            return b0 + b1 * ((1 - np.exp(-t / tau)) / (t / tau)) + b2 * (((1 - np.exp(-t / tau)) / (t / tau)) - np.exp(-t / tau))
+
+        params, _ = curve_fit(nelson_siegel_curve, maturities, yields)
+
+        print("Nelson-Siegel Model Parameters:", params)
+
+
     # A different matplotlibes historgram layout.
     # def plot_histogram(self, data):
     #     """
@@ -545,7 +581,6 @@ class BondApp:
                 ]
                 output.append(output_this)
         return output
-
 
 # Run the application, main entry point.
 if __name__ == "__main__":
